@@ -1,0 +1,43 @@
+name: Reconstruct route map
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build-map:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct map and update README
+        shell: bash
+        run: |
+          cat .tmp-map/chunk00 .tmp-map/chunk01 .tmp-map/chunk02 .tmp-map/chunk03 | base64 -d > "西藏大环线.webp"
+          echo "f81b29631e155792f1efdc677dfb59731521570062132c93f2ab904c622cf393  西藏大环线.webp" | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('README.md')
+          s = p.read_text(encoding='utf-8')
+          line = '![西藏大环线示意图](./西藏大环线.webp)'
+          if line not in s:
+              marker = '路线大致覆盖：'
+              if marker in s:
+                  s = s.replace(marker, line + '\n\n' + marker, 1)
+              else:
+                  s = line + '\n\n' + s
+              p.write_text(s, encoding='utf-8')
+          PY
+          rm -rf .tmp-map
+          rm -f .github/workflows/reconstruct-map.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add Tibet Grand Loop overview map"
+          git push

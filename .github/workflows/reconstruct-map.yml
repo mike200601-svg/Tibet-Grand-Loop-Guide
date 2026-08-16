@@ -19,7 +19,7 @@ jobs:
       - name: Reconstruct map and update README
         shell: bash
         run: |
-          cat .tmp-map/chunk00 .tmp-map/chunk01 .tmp-map/chunk02 .tmp-map/chunk03 | base64 -d > "西藏大环线.webp"
+          cat .tmp-map/chunk00a .tmp-map/chunk00b .tmp-map/chunk00c .tmp-map/chunk01 .tmp-map/chunk02 .tmp-map/chunk03 | base64 -d > "西藏大环线.webp"
           echo "f81b29631e155792f1efdc677dfb59731521570062132c93f2ab904c622cf393  西藏大环线.webp" | sha256sum -c -
           python3 - <<'PY'
           from pathlib import Path
